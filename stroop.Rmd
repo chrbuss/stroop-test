@@ -24,11 +24,19 @@ $$\ H_0: (μIncon-μCon) ≤ 0 $$
 
 $$\ H_1: (μIncon-μCon) > 0 $$
 
-The $\ H_0$ claims that the difference between the two groups is (smaller) than 0.
+$\ H_0$ claims that the difference between the two groups is (smaller) than 0.
+$\ H_1$ claims the opposite, namely that the difference between both means is
+significantly different from 0.
+
 $\ μIncon$ indicates the mean of the population in the incongruent condition, while
 $\ μCon$ indicates the mean for the congruent condition.
 
-I conduct a paired t-test, because in the experiment each subject is measured
+The z-test should be used when the standard deviation in the population is known and 
+the number of observations is greater than 30. In this case, there are only 24 observations
+and we do not know the standard deviation of the population because we draw a sample.
+Therefore, a t-test is the better option.
+
+I conduct a *paired* t-test, because in the experiment each subject is measured
 twice.
 
 An two-sided test would also be possible, but there is a clear indication of the
@@ -51,10 +59,13 @@ the reaction time in the congruent condition of 14.05 seconds.
 However, we have to assess if this difference is
 statistically significant on a predefined significance level.
 
-One measures of *variabilit* is variance:
+One measures of *variabilit* is the *standard deviation*:
 ```{r}
-var(df$Congruent)
-var(df$Incongruent)
+congruent_sd <- sd(df$Congruent)
+incongruent_sd <- sd(df$Incongruent)
+
+congruent_sd
+incongruent_sd
 ```
 
 The variance in the incongruent is larger than in the congruent condition.
@@ -86,8 +97,17 @@ individuals more than others.
 ## 5. Now, perform the statistical test and report your results. What is your confidence level and your critical statistic value? Do you reject the null hypothesis or fail to reject it? Come to a conclusion in terms of the experiment task. Did the results match up with your expectations?
 
 ```{r}
+n=nrow(df)
 # Critical value for df=23, one sided
-abs(qt(0.05, 23))
+abs(qt(0.05, n-1))
+
+# means
+congruent_mean <- mean(df$Congruent)
+incongruent_mean <- mean(df$Incongruent)
+
+# One tailed 95% CI of congruent and incongruent
+congruent_mean + qt(0.95,df=n-1)*congruent_sd/sqrt(n)
+incongruent_mean - qt(0.95,df=n-1)*incongruent_sd/sqrt(n)
 
 # Perform two-sided  t-test
 t.test(df$Incongruent, df$Congruent,paired=TRUE, alternative = 'greater')
@@ -95,6 +115,8 @@ t.test(df$Incongruent, df$Congruent,paired=TRUE, alternative = 'greater')
 
 I decide on a 95% confidence level. The degree of freedoms is n-1 = 23.
 The respective critical t-value is 1.713872
+
+The one-sided CIs of the two variables are 15.29634 and 20.3377.
 
 $\ H_0$ can be rejected. The p-value is smaller than 0.05 and the empirical t-value
 is greater than the critical t-value. This is in line with my expectations that
@@ -116,3 +138,4 @@ in this case.
 * Paired t-test: http://www.statisticssolutions.com/manova-analysis-paired-sample-t-test/
 * Critical value: https://stats.stackexchange.com/questions/21596/how-can-i-calculate-a-critical-t-value-using-r
 * R-Markdown: http://www.statpower.net/Content/310/R%20Stuff/SampleMarkdown.html
+* CI in R: http://www.cyclismo.org/tutorial/R/confidence.html
